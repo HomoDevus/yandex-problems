@@ -1,0 +1,14 @@
+{
+  "name": "yandex-problems",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stream": "node stream.js",
+    "file": "node file.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
