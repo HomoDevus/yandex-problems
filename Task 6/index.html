@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Почта с тегами</title>
+  <meta charset='utf-8'>
+  <style>
+    .Page {
+      font-family: Arial;
+      font-size: 12px;
+      margin: 0;
+      padding: 0;
+      color: #2f2d33;
+    }
+
+    .Logo {
+      font-size: 24px;
+      padding: 12px;
+      margin: 0;
+    }
+
+    .Main {
+      display: flex;
+    }
+
+    .Tags {
+      width: 25%;
+      background-color: #fffae5;
+      padding: 6px;
+    }
+
+    .Tags_dropzone {
+      background-color: #ffedba;
+    }
+
+    .Tags_dragovered {
+      background-color: #ffd98e;
+    }
+
+    .Tags_dragovered * {
+      pointer-events: none;
+    }
+
+    .Tag {
+      background-color: #ffc062;
+      color: #592400;
+      margin: 6px;
+      padding: 6px;
+      display: inline-block;
+    }
+
+    .Tag_dragged {
+      background-color: #ff9100;
+    }
+
+    .Tag_removed {
+      display: none;
+    }
+
+    .Letters {
+      width: 100%;
+      background-color: #91cfff;
+    }
+
+    .Letters_dropzone {
+      background-color: #4da0ff;
+    }
+
+    .Letter {
+      display: flex;
+      color: #00244d;
+    }
+
+    .Letter_dragovered {
+      background-color: #006fed;
+    }
+
+    .Letter_dragovered * {
+      pointer-events: none;
+    }
+
+    .Letter__Title {
+      margin: 12px;
+    }
+  </style>
+</head>
+
+<body class="Page">
+<script>
+  let data = window.data || {
+    tags: {
+      '1': 'важное',
+      '2': 'личное',
+      '3': 'рабочее',
+      '4': 'Проект X',
+      '5': 'Проект Y'
+    },
+    letters: [
+      {
+        id: '1',
+        title: 'Приглашение на день рождения',
+        tags: ['1', '2']
+      },
+      {
+        id: '2',
+        title: 'Ответ на ваш комментарий',
+        tags: ['2']
+      },
+      {
+        id: '3',
+        title: 'Резюме последней встречи про X',
+        tags: ['3', '4']
+      },
+      {
+        id: '4',
+        title: 'Расчётный лист',
+        tags: ['1', '3']
+      },
+      {
+        id: '5',
+        title: 'Нужна помощь с Y',
+        tags: ['3', '5']
+      },
+      {
+        id: '6',
+        title: 'Регулярная рассылка для клиентов',
+        tags: []
+      }
+    ]
+  }
+
+  function mapAndJoin(a, f, s = '') {
+    return a.map(f).join(s)
+  }
+
+  function buildHtml(data) {
+    return `
+      <div class="Main">
+        <div class="Tags">
+          ${mapAndJoin(
+      Object.entries(data.tags),
+      ([id, title]) => buildTagHtml(id, title))}
+        </div>
+        <div class="Letters">
+          ${mapAndJoin(
+      data.letters,
+      ({ id, title, tags }) => `
+              <div class="Letter" data-letter-id="${id}">
+                <div class="Letter__Title">${title}</div>
+                ${mapAndJoin(tags, (l) => buildTagHtml(l, data.tags[l]))}
+              </div>
+            `)}
+        </div>
+      </div>
+    `
+  }
+
+  function buildTagHtml(id, title) {
+    return `<div class="Tag" data-tag-id="${id}">${title}</div>`
+  }
+
+  document.body.innerHTML = buildHtml(data);
+  window.onSolutionReady && window.onSolutionReady();
+</script>
+<script>
+  let isDragging = false
+  let lettersWithEvent = []
+  let tagsEvent
+  let checkBehindDraggedInterval
+
+  function clearSelection() {
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    } else if (document.selection) {
+      document.selection.empty();
+    }
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    let elementToDrag = event.target.closest('.Tag')
+
+    if (!elementToDrag) return null
+
+    clearSelection()
+    e.preventDefault()
+
+    elementToDrag.ondragstart = function () {
+      return false;
+    };
+
+    let coords, shiftX, shiftY;
+
+    startDrag(elementToDrag, event.clientX, event.clientY);
+
+    function onMouseUp(event) {
+      finishDrag();
+    };
+
+    function onMouseMove(event) {
+      moveAt(event.clientX, event.clientY);
+    }
+
+    function onLetterHover(e) {
+      e.target.classList.add('Letter_dragovered')
+      e.target.addEventListener('mouseleave', onLetterLeave)
+    }
+
+    function onLetterLeave(e) {
+      console.log(e.relatedTarget)
+      if (!e.relatedTarget.classList.contains('Tag')) {
+        e.target.classList.remove('Letter_dragovered')
+      }
+    }
+
+    function onTagsHover(e) {
+      e.target.classList.add('Tags_dragovered')
+      e.target.addEventListener('mouseleave', onTagsLeave)
+    }
+
+    function onTagsLeave(e) {
+      e.target.classList.remove('Letter_dragovered')
+    }
+
+    function startDrag(element, clientX, clientY) {
+      if (isDragging) {
+        return;
+      }
+
+      isDragging = true;
+
+      document.addEventListener('mousemove', onMouseMove);
+      element.addEventListener('mouseup', onMouseUp);
+
+      shiftX = clientX - element.getBoundingClientRect().left;
+      shiftY = clientY - element.getBoundingClientRect().top;
+
+      element.style.position = 'fixed';
+      element.classList.add('Tag_dragged')
+
+      let tagsElement = document.getElementsByClassName('Tags')[0]
+      let lettersElement = document.getElementsByClassName('Letters')[0]
+      // Добавляем классы для подсвечивания мест куда можно дропнуть тег
+      lettersElement?.classList.add('Letters_dropzone')
+      if (element.closest('.Letters')) {
+        tagsElement?.classList.add('Tags_dropzone')
+      }
+      // Добавляем eventListener к письмам на котором нет текущего тега для их подсвечивания при hover
+      let letters = Array.from(document.querySelectorAll('.Letter'))
+      let lettersWithoutTag = letters.filter(letter => {
+        for (let tagElement of letter.getElementsByClassName('Tag')) {
+          if (tagElement.getAttribute('data-tag-id') === element.getAttribute('data-tag-id')) {
+            return false
+          }
+        }
+        return true
+      })
+      for (let letter of lettersWithoutTag) {
+        letter.addEventListener('mouseenter', onLetterHover)
+        lettersWithEvent.push(letter)
+      }
+      // hover для зоны тегов
+      if (element.closest('.Letters')) {
+        tagsElement?.addEventListener('mouseleave', onTagsHover)
+        tagsEvent = tagsElement
+      }
+
+      moveAt(clientX, clientY);
+    };
+
+    function finishDrag() {
+      if (!isDragging) {
+        return;
+      }
+
+      isDragging = false;
+
+      elementToDrag.style.position = 'unset';
+      elementToDrag.style.left = 'unset'
+      elementToDrag.style.right = 'unset'
+
+      elementToDrag.classList.remove('Tag_dragged')
+
+      let tagsElement = document.getElementsByClassName('Tags')[0]
+      let lettersElement = document.getElementsByClassName('Letters')[0]
+      lettersElement?.classList.remove('Letters_dropzone')
+      tagsElement?.classList.remove('Tags_dropzone')
+
+      document.removeEventListener('mousemove', onMouseMove);
+      elementToDrag.removeEventListener('mouseup', onMouseUp);
+
+      for (let letter of lettersWithEvent) {
+        letter.removeEventListener('mouseenter', onLetterHover)
+        letter.removeEventListener('mouseleave', onLetterLeave)
+      }
+      lettersWithEvent = []
+      tagsElement?.classList.remove('Tags_dropzone')
+
+      clearInterval(checkBehindDraggedInterval)
+    }
+
+    function moveAt(clientX, clientY) {
+      let newX = clientX - shiftX;
+      let newY = clientY - shiftY;
+
+      if (newX < 0) newX = 0;
+      if (newX > document.documentElement.clientWidth - elementToDrag.offsetWidth) {
+        newX = document.documentElement.clientWidth - elementToDrag.offsetWidth;
+      }
+      if (newY < 0) newY = 0;
+      if (newY > document.documentElement.clientHeight - elementToDrag.offsetHeight) {
+        newY = document.documentElement.clientHeight - elementToDrag.offsetHeight;
+      }
+
+      elementToDrag.style.left = newX + 'px';
+      elementToDrag.style.top = newY + 'px';
+    }
+  })
+</script>
+</body>
+</html>
