@@ -1,9 +1,9 @@
 /**
  * @param d {number} - Width of the hole in the wall
  * @param e {number} - Height of the hole in the wall
- * @param a {number} - Length of the brick
+ * @param a {number} - Width of the brick
  * @param b {number} - Height of the brick
- * @param c {number} - Width of the brick
+ * @param c {number} - Length of the brick
  * Thoughts: First we need to find ways we can turn the brick
  *
  * Solution: First we find what is smaller d or e. Smaller value will be height and bigger width
@@ -12,12 +12,22 @@
  *
  * @return {boolean}
  */
-function castleSolution(d, e, a, b, c) {
-  let holeHeight = Math.min(d, e)
-  let holeWidth = Math.max(d, e)
+function castleSolution(a, b, c, d, e) {
   let [brickHeight, brickWidth] = [a, b, c].sort((num1, num2) => num1 - num2)
+  let [holeHeight, holeWidth] = [d, e].sort((num1, num2) => num1 - num2)
 
-  return holeHeight > brickHeight && holeWidth > brickWidth;
+  if (holeHeight >= brickHeight && holeWidth >= brickWidth) {
+    return 'YES'
+  } else {
+    return 'NO'
+  }
 }
 
-console.log(castleSolution(3, 2, 2, 1, 3))
+const fs = require('fs')
+let fileContent = fs.readFileSync("input.txt", "utf8");
+
+const data = fileContent.toString().split('\n').map(item => parseInt(item))
+
+const result = castleSolution(...data)
+
+fs.writeFileSync("output.txt", result.toString())

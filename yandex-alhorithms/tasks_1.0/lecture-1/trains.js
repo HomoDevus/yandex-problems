@@ -44,4 +44,4 @@ function trans(a, b, n, m) {
   }
 }
 
-console.log(trans(2, 4, 5, 4))
+console.log(trans(1, 3, 3, 2))

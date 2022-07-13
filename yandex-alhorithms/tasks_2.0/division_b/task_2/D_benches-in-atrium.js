@@ -9,22 +9,28 @@ function getRemovableBlocks(benchLen, blocksAm, blocksPos) {
   let closestLeftValue = null
   let closestRightValue = null
 
+  // Check if there's an extra one on the left and right
+
   for (let [index, block] of blocksPos.entries()) {
     let distance = Math.floor(center) - block
+    // console.log(block, distance)
+    // console.log(center)
 
-    console.log(center)
-    console.log(!isInt(center), distance)
-    if (!isInt(center) && distance === 0) return blocksPos.splice(index, 1)
+    // if (!isInt(center) && distance === 0) return blocksPos.splice(index, 1)
+    if (!isInt(center) && distance === 0) return block
 
     if (distance > 0 && distance < closestRight) {
       closestRight = distance
       closestLeftValue = block
-    } else if (distance < 0 && distance > closestLeft) {
+    } else if (distance <= 0 && distance > closestLeft) {
       closestLeft = distance
       closestRightValue = block
     }
   }
 
+  if (closestLeftValue === null || closestRightValue === null) {
+    return ''
+  }
   return closestLeftValue + ' ' + closestRightValue
 }
 
