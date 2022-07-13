@@ -18,30 +18,31 @@
  * n = 6
  * m = 5
  */
-function trans(a, b, n, m) {
-  let shortPlatformWaiting, longPlatformWaiting, shortPlatformNum, longPlatformNum
-  if (a > b) {
-    shortPlatformWaiting = b
-    longPlatformWaiting = a
-    shortPlatformNum = m
-    longPlatformNum = n
-  } else {
-    shortPlatformWaiting = a // 2
-    longPlatformWaiting = b // 4
-    shortPlatformNum = n // 6
-    longPlatformNum = m // 3
-  }
-  let maxFirstTrainWaiting = shortPlatformWaiting // 2
-  let shortPlatformTime = shortPlatformNum * shortPlatformWaiting + shortPlatformNum // 6 * 2 = 13
-  let longPlatformTime = longPlatformNum * longPlatformWaiting + longPlatformNum // 3 * 4 = 13
+function trains(a, b, n, m) {
+  let maxFirstPlatform = a * (n + 1) + n
+  let maxSecondPlatform = b * (m + 1) + m
+  let minFirstPlatform = maxFirstPlatform - a * 2
+  let minSecondPlatform = maxSecondPlatform - b * 2
 
-  if (longPlatformTime - shortPlatformTime > maxFirstTrainWaiting) { // 12 - 12 = 0 > 2 = false
-    return 'INCORRECT'
+  let minArriveTime = Math.max(minFirstPlatform, minSecondPlatform) // 7 16 5
+  let maxArriveTime = Math.min(maxFirstPlatform, maxSecondPlatform) // 3 17 7
+
+  if (minArriveTime > maxArriveTime) {
+    return -1
   } else {
-    let minTime = Math.min(shortPlatformTime, longPlatformTime) // 13
-    let maxTime = Math.max(shortPlatformTime, longPlatformTime) // 13
-    return `Min time: ${minTime} \nMax time: ${maxTime + maxFirstTrainWaiting}` // 13 15
+    return minArriveTime + ' ' + maxArriveTime
   }
 }
 
-console.log(trans(1, 3, 3, 2))
+const fs = require('fs')
+let fileContent = fs.readFileSync("input.txt", "utf8");
+
+const data = fileContent.toString().split('\n').map(item => parseInt(item))
+
+const result = trains(...data)
+
+fs.writeFileSync("output.txt", result.toString())
+
+console.log(trains(2, 2, 6, 5))
+console.log(trains(1, 3, 3, 2))
+console.log(trains(1, 5, 1, 2))
