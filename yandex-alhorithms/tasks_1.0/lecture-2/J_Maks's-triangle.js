@@ -9,6 +9,8 @@ function getPossibleTune(changes) {
     let direction = changes[i][1]
     let changeHalf = (prevNum - num) / 2
 
+    if (Math.abs(num - prevNum) < 10 ** (-6)) continue
+
     if (changeHalf > 0) {
       if (direction === 'closer') {
         let res = num + changeHalf
