@@ -1,2 +1,5 @@
-ABBACAB
-BCABB
+3
+Hello Hi
+Bye Goodbye
+List Array
+Goodbye

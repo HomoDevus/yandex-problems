@@ -1,24 +1,30 @@
-function countCubes(setN, setM) {
+function countCubes(arrN, arrM) {
   let intersections = []
 
-  for (let numN of setN) {
-    if (setM.includes(numN)) {
+  for (let [i, numN] of arrN.entries()) {
+    let cubeIndex = arrM.indexOf(numN)
+
+    if (cubeIndex !== -1) {
       intersections.push(numN)
+
+      arrN[i] = arrN[arrN.length - 1]
+      arrN.pop()
+
+      arrM[cubeIndex] = arrM[arrM.length - 1]
+      arrM.pop()
     }
   }
 
-
-  for (let intersection of intersections) {
-    setN.remove(intersection)
-    setM.remove(intersection)
-  }
+  arrN = arrN.sort((a, b) => a - b)
+  arrM = arrM.sort((a, b) => a - b)
+  intersections = intersections.sort((a, b) => a - b)
 
   return intersections.length + '\n'
-    + intersections.sort((a, b) => a - b).join(' ') + '\n'
-    + setN.size + '\n'
-    + [...setN].sort((a, b) => a - b).join(' ')  + '\n'
-    + setM.size  + '\n'
-    + [...setM].sort((a, b) => a - b).join(' ')  + '\n'
+    + intersections.join(' ') + '\n'
+    + arrN.length + '\n'
+    + arrN.join(' ')  + '\n'
+    + arrM.length  + '\n'
+    + arrM.join(' ')  + '\n'
 }
 
 const fs = require('fs')
