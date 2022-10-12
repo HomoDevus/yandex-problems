@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "yandex-problems",
   "version": "1.0.0",
   "description": "",
@@ -10,5 +11,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^3.2.10"
+  }
 }
