@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Triangulation</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=500, height=500" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .Map {
+        width: 500px;
+        height: 500px;
+        background: #ed7b00;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .station, .overlap {
+        border-radius: 50%;
+        position: absolute;
+        overflow: hidden;
+        width: 20px;
+        height: 20px;
+      }
+      .station {
+        border: 1px solid #000;
+        background-clip: content-box;
+        background-color: #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="Map">
+    </div>
+
+    <script>
+      function triangulation(stations, stationIds) {
+        const MAP = document.getElementsByClassName('Map')[0]
+        let intersectionColor = 0
+
+        for (let i = 0; i < stations.length; i++) {
+          const station = stations[i]
+          const STATION = document.createElement('div')
+
+          STATION.classList.add('station')
+          STATION.id = station.id.toString()
+          STATION.style.left = station.coordinates[0] - station.radius + 'px'
+          STATION.style.top = station.coordinates[1] - station.radius + 'px'
+          STATION.style.padding = station.radius - 10 + 'px'
+
+          MAP.appendChild(STATION)
+        }
+
+        for (let registrations of stationIds) {
+          const firstStation = stations.find(station => station.id === registrations[0])
+          const SECOND_STATION = document.getElementById(registrations[1])
+          const OVERLAP_CIRCLE = document.createElement('div')
+
+          OVERLAP_CIRCLE.classList.add('overlap')
+          OVERLAP_CIRCLE.style.left = firstStation.coordinates[0] - firstStation.radius - parseInt(SECOND_STATION.style.left) + 'px'
+          OVERLAP_CIRCLE.style.top = firstStation.coordinates[1] - firstStation.radius - parseInt(SECOND_STATION.style.top) + 'px'
+          OVERLAP_CIRCLE.style.padding = firstStation.radius - 10 + 'px'
+          OVERLAP_CIRCLE.style.backgroundColor = toHex(intersectionColor)
+          intersectionColor++
+
+          SECOND_STATION.appendChild(OVERLAP_CIRCLE)
+        }
+      }
+
+      function toHex(decimal) {
+        return '#' + parseInt(decimal, 10).toString(16).repeat(3)
+      }
+
+      window.data && triangulation(window.data.stations, window.data.stationIds)
+      addEventListener('load', (event) => {
+        window.onSolutionReady && window.onSolutionReady()
+      });
+    </script>
+  </body>
+</html>

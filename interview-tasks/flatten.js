@@ -29,4 +29,26 @@ const flatten = (arr) => {
   return result
 }
 
+// RECURSION
+
+function flattenParent(arr) {
+  const result = []
+  flatten(arr, result)
+  return result
+}
+
+function flatten(arr, output) {
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i]
+
+    if (Array.isArray(item)) {
+      arr[i] = flatten(item, output)
+    } else {
+      output.push(item)
+    }
+  }
+
+  return arr
+}
+
 console.log(flatten([0, 0, 0, 0, [1, 2, [9, 9, 9], 3], 3]))
