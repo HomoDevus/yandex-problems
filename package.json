@@ -1,5 +1,5 @@
 {
-  "type": "module",
+  "type": "commonjs",
   "name": "yandex-problems",
   "version": "1.0.0",
   "description": "",
@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "stream": "node stream.js",
-    "file": "node file.js"
+    "file": "node readFile.js"
   },
   "keywords": [],
   "author": "",
